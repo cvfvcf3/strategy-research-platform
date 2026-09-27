@@ -1,0 +1,44 @@
+{
+  "name": "strategy-research-platform",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "drizzle-kit push --force && next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "db:push": "drizzle-kit push",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "download-history": "tsx src/scripts/download-history.ts",
+    "run-backtest": "tsx src/scripts/run-backtest.ts",
+    "run-walk-forward": "tsx src/scripts/run-walk-forward.ts",
+    "run-monte-carlo": "tsx src/scripts/run-monte-carlo.ts"
+  },
+  "dependencies": {
+    "next": "15.1.6",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "drizzle-orm": "0.38.4",
+    "drizzle-kit": "0.30.2",
+    "postgres": "3.4.5",
+    "zod": "3.24.1",
+    "recharts": "2.15.0",
+    "dotenv": "16.4.7",
+    "tsx": "4.19.2"
+  },
+  "devDependencies": {
+    "typescript": "5.7.3",
+    "@types/node": "22.10.7",
+    "@types/react": "19.0.7",
+    "@types/react-dom": "19.0.3",
+    "tailwindcss": "3.4.17",
+    "postcss": "8.5.1",
+    "autoprefixer": "10.4.20",
+    "vitest": "2.1.8",
+    "eslint": "9.18.0",
+    "eslint-config-next": "15.1.6"
+  }
+}
