@@ -1,7 +1,7 @@
 node_modules/
 .next/
 .env
-data/
+/data/
 *.log
 drizzle/
 .DS_Store
