@@ -1,12 +1,10 @@
-import { PAIRS_STRATEGIES, SINGLE_SYMBOL_STRATEGIES } from "@/lib/strategies/registry";
+import { getStrategyMeta } from "@/lib/strategies/registry";
 import RunBacktestForm from "@/components/RunBacktestForm";
 import { notFound } from "next/navigation";
 
 export default async function StrategyDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const single = (SINGLE_SYMBOL_STRATEGIES as Record<string, (typeof SINGLE_SYMBOL_STRATEGIES)["donchian_breakout"]>)[id];
-  const pairs = (PAIRS_STRATEGIES as Record<string, (typeof PAIRS_STRATEGIES)["pairs_trading"]>)[id];
-  const strategy = single ?? pairs;
+  const strategy = getStrategyMeta(id);
   if (!strategy) notFound();
 
   return (
@@ -19,7 +17,7 @@ export default async function StrategyDetailPage({ params }: { params: Promise<{
         {JSON.stringify(strategy.defaultParams, null, 2)}
       </pre>
 
-      <RunBacktestForm strategyKey={strategy.key} isPairs={!!pairs} />
+      <RunBacktestForm strategyKey={strategy.key} isPairs={strategy.kind === "pairs"} />
     </div>
   );
 }
