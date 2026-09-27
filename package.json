@@ -18,7 +18,7 @@
     "run-monte-carlo": "tsx src/scripts/run-monte-carlo.ts"
   },
   "dependencies": {
-    "next": "15.1.6",
+    "next": "15.1.11",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "drizzle-orm": "0.38.4",
@@ -39,6 +39,6 @@
     "autoprefixer": "10.4.20",
     "vitest": "2.1.8",
     "eslint": "9.18.0",
-    "eslint-config-next": "15.1.6"
+    "eslint-config-next": "15.1.11"
   }
 }
