@@ -157,3 +157,4 @@ Run all four before trusting a deployment. See `PRODUCTION_CHECKLIST.md`.
   compared) — there is no query-string fallback, since that would end up
   in server access logs.
 - Structured JSON logs never include secrets, full request bodies, or PII.
+
