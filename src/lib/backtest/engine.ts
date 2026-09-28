@@ -38,7 +38,7 @@ export type BacktestResult = {
 type PendingEntry = { side: Side; stopLoss: number | null; takeProfit: number | null; reason: string };
 type PendingExit = { reason: string };
 
-type PositionWithSize = Position & { size: number; entryFee: number; entryTime: number };
+type PositionWithSize = Position & { size: number; entryFee: number; entryTime: number; equityAtEntry: number };
 
 /** Public entry point: resolves `config.strategyKey` from the registry, then delegates to the testable core below. */
 export function runBacktest(candles: Candle[], config: BacktestConfig): BacktestResult {
@@ -103,6 +103,7 @@ export function runBacktestWithStrategy<P, S>(
       if (size > maxSize) size = maxSize;
       if (size > 0) {
         const entryFee = feeAmount(size * fillPrice, config.feeBps);
+        const equityAtEntry = equity; // account equity BEFORE this trade's entry fee — the basis for netPnlPct
         equity -= entryFee;
         position = {
           side: pendingEntry.side,
@@ -113,6 +114,7 @@ export function runBacktestWithStrategy<P, S>(
           size,
           entryFee,
           entryTime: candle.closeTime,
+          equityAtEntry,
         };
       }
       pendingEntry = null;
@@ -192,7 +194,6 @@ function closeTrade(
   const netPnl = grossPnl - exitFee;
   applyEquityDelta(netPnl);
 
-  const equityAtEntry = position.entryPrice * position.size; // notional basis for pct, not total account equity
   trades.push({
     side: position.side,
     entryIndex: position.entryIndex,
@@ -205,7 +206,9 @@ function closeTrade(
     grossPnl,
     fees: position.entryFee + exitFee,
     netPnl: netPnl - position.entryFee,
-    netPnlPct: equityAtEntry > 0 ? (netPnl - position.entryFee) / equityAtEntry : 0,
+    // Fraction of ACCOUNT equity at entry (not of the trade's notional), so compounding
+    // these per-trade returns (Monte Carlo, regime breakdown) matches the real equity curve.
+    netPnlPct: position.equityAtEntry > 0 ? (netPnl - position.entryFee) / position.equityAtEntry : 0,
     exitReason,
     barsHeld: exitIndex - position.entryIndex,
   });

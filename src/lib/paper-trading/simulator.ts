@@ -43,6 +43,8 @@ type OpenPosition = {
   takeProfit: number | null;
   size: number;
   entryFee: number;
+  /** Account equity at entry (pnlPct basis). Optional only for state persisted before this field existed. */
+  equityAtEntry?: number;
 };
 
 type PaperState = {
@@ -106,6 +108,7 @@ export async function advancePaperTrading(config: PaperConfig): Promise<{ proces
       const size = positionSize({ method: config.sizingMethod, equity, entryPrice: fillPrice, stopLossPrice: sizingStop });
       if (size > 0) {
         const entryFee = feeAmount(size * fillPrice, config.feeBps);
+        const equityAtEntry = equity;
         equity -= entryFee;
         position = {
           side: pendingEntry.side,
@@ -115,6 +118,7 @@ export async function advancePaperTrading(config: PaperConfig): Promise<{ proces
           takeProfit: pendingEntry.takeProfit,
           size,
           entryFee,
+          equityAtEntry,
         };
         await db.insert(paperTrades).values({
           strategyKey: config.strategyKey,
@@ -191,7 +195,7 @@ async function closeAndRecord(
     position.side === "long" ? (exitPrice - position.entryPrice) * position.size : (position.entryPrice - exitPrice) * position.size;
   const exitFee = feeAmount(position.size * exitPrice, feeBps);
   const netPnl = grossPnl - exitFee - position.entryFee;
-  const notional = position.entryPrice * position.size;
+  const basis = position.equityAtEntry ?? position.entryPrice * position.size;
 
   // Precisely scoped: this strategy+symbol+market+timeframe can only have
   // one OPEN row at a time (the simulator never opens a second position
@@ -203,7 +207,7 @@ async function closeAndRecord(
       exitTime,
       exitPrice,
       pnl: netPnl,
-      pnlPct: notional > 0 ? netPnl / notional : 0,
+      pnlPct: basis > 0 ? netPnl / basis : 0,
       status: "CLOSED",
       exitReason,
     })

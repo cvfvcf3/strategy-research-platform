@@ -180,3 +180,22 @@ describe("runBacktestWithStrategy — position sizing respects risk-per-trade", 
     expect(notional).toBeLessThanOrEqual(10_000 * 1.0001); // maxLeverage defaults to 1
   });
 });
+
+describe("runBacktestWithStrategy — per-trade return basis", () => {
+  it("netPnlPct is a fraction of ACCOUNT equity at entry, not of the trade's notional", () => {
+    // Stop 20 below entry -> size = (1% of 10,000) / 20 = 5 units, i.e. only
+    // $500 notional on a $10,000 account. Price doubles 100 -> 200, so the
+    // trade makes $500 = 5% of account equity (but 100% of its own notional).
+    const closes = [100, 100, 100, 100, 100, 200, 200, 200];
+    const candles = makeCandles(closes);
+    const strategy = scriptedStrategy({
+      1: { type: "enter", side: "long", stopLoss: 80, takeProfit: null, reason: "enter" },
+      4: { type: "exit", reason: "exit" },
+    });
+    const result = runBacktestWithStrategy(candles, strategy, {
+      params: {}, initialCapital: 10_000, sizingMethod: "fixed_fractional", feeBps: 0, slippageBps: 0, market: "spot",
+    });
+    expect(result.trades[0]!.netPnl).toBeCloseTo(500, 4);
+    expect(result.trades[0]!.netPnlPct).toBeCloseTo(0.05, 6);
+  });
+});

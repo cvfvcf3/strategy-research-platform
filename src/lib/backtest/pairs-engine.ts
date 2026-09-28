@@ -37,6 +37,7 @@ export function runPairsBacktest(candlesA: Candle[], candlesB: Candle[], config:
   let sizeA = 0;
   let sizeB = 0;
   let entryFees = 0;
+  let equityAtEntry = 0;
 
   const trades: Trade[] = [];
   const equityCurve: EquityPoint[] = [];
@@ -53,7 +54,6 @@ export function runPairsBacktest(candlesA: Candle[], candlesB: Candle[], config:
       const pnlB = direction === "long_a_short_b" ? (entryPriceB - exitB) * sizeB : (exitB - entryPriceB) * sizeB;
       const exitFees = feeAmount(sizeA * exitA, config.feeBps) + feeAmount(sizeB * exitB, config.feeBps);
       const netPnl = pnlA + pnlB - exitFees - entryFees;
-      const notionalAtEntry = entryPriceA * sizeA + entryPriceB * sizeB;
       equity += pnlA + pnlB - exitFees;
 
       trades.push({
@@ -68,7 +68,7 @@ export function runPairsBacktest(candlesA: Candle[], candlesB: Candle[], config:
         grossPnl: pnlA + pnlB,
         fees: exitFees + entryFees,
         netPnl,
-        netPnlPct: notionalAtEntry > 0 ? netPnl / notionalAtEntry : 0,
+        netPnlPct: equityAtEntry > 0 ? netPnl / equityAtEntry : 0,
         exitReason: action.reason,
         barsHeld: i - entryIndex,
       });
@@ -82,6 +82,7 @@ export function runPairsBacktest(candlesA: Candle[], candlesB: Candle[], config:
       sizeA = notionalPerLeg / entryPriceA;
       sizeB = notionalPerLeg / entryPriceB;
       entryFees = feeAmount(sizeA * entryPriceA, config.feeBps) + feeAmount(sizeB * entryPriceB, config.feeBps);
+      equityAtEntry = equity; // account equity before entry fees
       equity -= entryFees;
       direction = action.direction;
       entryIndex = i;
