@@ -1,6 +1,6 @@
 import type { Candle, FundingPoint, Market } from "../data/types";
 import { positionSize, type SizingMethod } from "../risk/position-size";
-import { SINGLE_SYMBOL_STRATEGIES, type SingleSymbolStrategyKey } from "../strategies/registry";
+import { getSingleSymbolStrategy, type SingleSymbolStrategyKey } from "../strategies/registry";
 import type { Position, Side, Strategy } from "../strategies/types";
 import { applySlippage, checkCandleExit, feeAmount } from "./execution";
 import { checkRejection, computeMetrics, type BacktestMetrics, type EquityPoint, type Trade } from "./metrics";
@@ -42,7 +42,7 @@ type PositionWithSize = Position & { size: number; entryFee: number; entryTime: 
 
 /** Public entry point: resolves `config.strategyKey` from the registry, then delegates to the testable core below. */
 export function runBacktest(candles: Candle[], config: BacktestConfig): BacktestResult {
-  return runBacktestWithStrategy(candles, SINGLE_SYMBOL_STRATEGIES[config.strategyKey], config);
+  return runBacktestWithStrategy(candles, getSingleSymbolStrategy(config.strategyKey), config);
 }
 
 /**

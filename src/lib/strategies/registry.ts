@@ -1,6 +1,7 @@
 import { donchianBreakout } from "./donchian-breakout";
 import { meanReversion } from "./mean-reversion";
 import { pairsTrading } from "./pairs-trading";
+import type { Strategy } from "./types";
 
 /** Single-symbol strategies runnable through the standard backtest engine. */
 export const SINGLE_SYMBOL_STRATEGIES = {
@@ -53,4 +54,17 @@ export function getStrategyMeta(key: string): StrategyMeta | null {
     return { key: s.key, name: s.name, description: s.description, defaultParams: s.defaultParams, kind: "pairs" };
   }
   return null;
+}
+
+/**
+ * The registry's strategies each have their own `Strategy<P, S>`
+ * instantiation, so a union of them can't be passed to generic code that
+ * expects one specific P/S. Callers that pick a strategy by string key at
+ * runtime (params arrive as plain JSON anyway) use this single, deliberate
+ * widening instead of scattering casts around the codebase.
+ */
+export type AnySingleSymbolStrategy = Strategy<Record<string, unknown>, unknown>;
+
+export function getSingleSymbolStrategy(key: SingleSymbolStrategyKey): AnySingleSymbolStrategy {
+  return SINGLE_SYMBOL_STRATEGIES[key] as unknown as AnySingleSymbolStrategy;
 }

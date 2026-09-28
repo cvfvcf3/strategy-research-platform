@@ -3,6 +3,9 @@ import { log } from "../utils/logger";
 
 const BACKOFF_MS = [1_000, 3_000, 9_000, 27_000]; // spec section 7.3
 
+/** A 4xx (other than 429) means the request itself is wrong — retrying can't help and would just hammer the API. */
+class NonRetryableHttpError extends Error {}
+
 /**
  * GET with retry+backoff. 429 → backoff and retry (up to the schedule
  * above). Transient 5xx → same. Any other non-OK status throws
@@ -37,11 +40,12 @@ export async function fetchWithRetry(url: string, source: string, timeoutMs = 10
         throw lastErr;
       }
       if (!res.ok) {
-        throw new Error(`${source} returned HTTP ${res.status}: ${await safeText(res)}`);
+        throw new NonRetryableHttpError(`${source} returned HTTP ${res.status}: ${await safeText(res)}`);
       }
       return await res.json();
     } catch (err) {
       clearTimeout(timer);
+      if (err instanceof NonRetryableHttpError) throw err;
       if (attempt >= BACKOFF_MS.length) {
         log.error("http_failed", { source, url, error: String(err) });
         throw err;

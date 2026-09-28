@@ -4,7 +4,7 @@ import { appConfig, paperEquity, paperTrades } from "../db/schema";
 import { getLatestClosedCandles } from "../data/closed-candles";
 import type { Market, Timeframe } from "../data/types";
 import { positionSize, type SizingMethod } from "../risk/position-size";
-import { SINGLE_SYMBOL_STRATEGIES, type SingleSymbolStrategyKey } from "../strategies/registry";
+import { getSingleSymbolStrategy, type SingleSymbolStrategyKey } from "../strategies/registry";
 import type { Side } from "../strategies/types";
 import { applySlippage, checkCandleExit, feeAmount } from "../backtest/execution";
 import { log } from "../utils/logger";
@@ -71,7 +71,7 @@ async function saveState(c: PaperConfig, state: PaperState): Promise<void> {
 }
 
 export async function advancePaperTrading(config: PaperConfig): Promise<{ processedBars: number; newTrades: number }> {
-  const strategy = SINGLE_SYMBOL_STRATEGIES[config.strategyKey];
+  const strategy = getSingleSymbolStrategy(config.strategyKey);
   const params = { ...strategy.defaultParams, ...config.params };
   const warmupWindow = config.warmupWindow ?? Math.max(300, strategy.minWarmupBars(params) + 50);
 

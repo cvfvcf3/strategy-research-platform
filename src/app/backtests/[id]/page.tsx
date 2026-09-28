@@ -132,15 +132,17 @@ export default async function BacktestDetailPage({ params }: { params: Promise<{
               </tr>
             </thead>
             <tbody>
-              {Object.entries(regimeBreakdown).map(([regime, m]) => (
-                <tr key={regime} className="border-t border-slate-800 font-mono">
-                  <td className="py-1.5">{regime}</td>
-                  <td className="py-1.5">{m.tradeCountInRegime}</td>
-                  <td className="py-1.5">{(m.totalReturnPct * 100).toFixed(1)}%</td>
-                  <td className="py-1.5">{m.sharpe.toFixed(2)}</td>
-                  <td className="py-1.5">{(m.winRatePct * 100).toFixed(0)}%</td>
-                </tr>
-              ))}
+              {Object.entries(regimeBreakdown).map(([regime, m]) =>
+                m ? (
+                  <tr key={regime} className="border-t border-slate-800 font-mono">
+                    <td className="py-1.5">{regime}</td>
+                    <td className="py-1.5">{m.tradeCountInRegime}</td>
+                    <td className="py-1.5">{(m.totalReturnPct * 100).toFixed(1)}%</td>
+                    <td className="py-1.5">{m.sharpe.toFixed(2)}</td>
+                    <td className="py-1.5">{(m.winRatePct * 100).toFixed(0)}%</td>
+                  </tr>
+                ) : null,
+              )}
             </tbody>
           </table>
         </div>
