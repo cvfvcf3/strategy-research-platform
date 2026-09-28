@@ -64,7 +64,7 @@ export default async function BacktestDetailPage({ params }: { params: Promise<{
       {wf && (
         <div className="mt-4 rounded border border-slate-800 bg-slate-900/40 p-4">
           <div className="mb-2 flex items-center justify-between">
-            <h3 className="text-sm font-medium">Walk-forward validation ({wf.windows.length} windows)</h3>
+            <h3 className="text-sm font-medium">Walk-forward validation ({(wf.windows as unknown[]).length} windows)</h3>
             <StatusBadge status={wf.passed ? "PASS" : "REJECTED"} />
           </div>
           <div className="text-sm text-slate-400">
