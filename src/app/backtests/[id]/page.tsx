@@ -79,6 +79,11 @@ export default async function BacktestDetailPage({ params }: { params: Promise<{
       {mc.length > 0 && (
         <div className="mt-4 rounded border border-slate-800 bg-slate-900/40 p-4">
           <h3 className="mb-2 text-sm font-medium">Monte Carlo</h3>
+          <p className="mb-2 text-xs text-slate-500">
+            Assumes trades are draws from one stable distribution — walk-forward is what tests whether that holds over time.
+            &quot;shuffle&quot; only reorders trades, and compounding is order-independent, so its return percentiles are all identical by construction: read its P(DD&gt;20%) instead.
+            &quot;slippage_noise&quot; jitters each trade by +/-20% at random, which averages out — it is not a cost-stress test (re-run the backtest with higher feeBps/slippageBps for that).
+          </p>
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-slate-500">
@@ -119,7 +124,7 @@ export default async function BacktestDetailPage({ params }: { params: Promise<{
         <div className="mt-4 rounded border border-slate-800 bg-slate-900/40 p-4">
           <h3 className="mb-2 text-sm font-medium">Performance by regime</h3>
           <div className="text-xs text-slate-500 mb-2">
-            If results only look good in one regime below, that's a real limitation of the strategy, not a display artifact.
+            Returns compound each trade's P&L as a fraction of account equity. Per-regime Sharpe is intentionally not shown (a per-trade series can't be annualized like a per-bar one). Regimes with only a handful of trades are noise — read the Trades column first.
           </div>
           <table className="w-full text-sm">
             <thead>
@@ -127,7 +132,6 @@ export default async function BacktestDetailPage({ params }: { params: Promise<{
                 <th className="pb-1 font-normal">Regime</th>
                 <th className="pb-1 font-normal">Trades</th>
                 <th className="pb-1 font-normal">Return</th>
-                <th className="pb-1 font-normal">Sharpe</th>
                 <th className="pb-1 font-normal">Win rate</th>
               </tr>
             </thead>
@@ -138,7 +142,6 @@ export default async function BacktestDetailPage({ params }: { params: Promise<{
                     <td className="py-1.5">{regime}</td>
                     <td className="py-1.5">{m.tradeCountInRegime}</td>
                     <td className="py-1.5">{(m.totalReturnPct * 100).toFixed(1)}%</td>
-                    <td className="py-1.5">{m.sharpe.toFixed(2)}</td>
                     <td className="py-1.5">{(m.winRatePct * 100).toFixed(0)}%</td>
                   </tr>
                 ) : null,

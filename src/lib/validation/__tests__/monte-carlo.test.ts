@@ -49,13 +49,15 @@ describe("runMonteCarlo", () => {
     expect(p75).toBeLessThanOrEqual(p95);
   });
 
-  it("shuffle preserves the same total return every run (reordering doesn't change the sum for additive returns) — but this engine compounds, so shuffling CAN change total return, which this test documents", () => {
-    // This is a documentation test, not an invariant: compounding means
-    // order matters (a -10% then +10% differs from +10% then -10%).
-    // Included so a future change to non-compounding math doesn't
-    // silently assume shuffling is a no-op.
+  it("shuffle leaves total return unchanged (compounding is order-independent: a*b === b*a) — only the drawdown path varies", () => {
+    // Multiplicative compounding means the final equity multiple is the
+    // product of (1 + r) over all trades, which doesn't depend on order.
+    // So shuffling can't produce a spread of final returns; its value is
+    // entirely in the max-drawdown distribution (probLargeDrawdown).
     const result = runMonteCarlo(trades, "shuffle", 200, 3);
-    expect(result.percentiles.p5).not.toEqual(result.percentiles.p95);
+    expect(result.percentiles.p5).toBeCloseTo(result.percentiles.p95, 9);
+    expect(result.probLargeDrawdown).toBeGreaterThanOrEqual(0);
+    expect(result.probLargeDrawdown).toBeLessThanOrEqual(1);
   });
 
   it("reports no_trades_to_simulate and fails when given an empty trade list", () => {
